@@ -12,6 +12,18 @@
         h1 {
             margin-bottom: 20px;
         }
+        .nav {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .nav a {
+            padding: 8px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -40,6 +52,13 @@
 </head>
 <body>
     <h1>Admin Dashboard</h1>
+
+    <div class="nav">
+        <a href="{{ route('admin.customers.index') }}" style="background: #3498db;">👥 Customers</a>
+        <a href="{{ route('admin.topup') }}" style="background: #2ecc71;">💰 Top-up</a>
+        <a href="{{ route('admin.products.index') }}" style="background: #e67e22;">🛒 Products</a>
+    </div>
+
     <p>Total Stations: {{ $stations->count() }}</p>
 
     <div class="grid">

@@ -32,8 +32,19 @@ class AuthenticatedSessionController extends Controller
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('customer.select_station');
-}
+
+        // Assign station from URL parameter
+        $pcId = $request->input('pc');
+        if ($pcId) {
+            $station = \App\Models\Station::find($pcId);
+            if ($station && !$station->is_occupied) {
+                $station->update(['is_occupied' => true, 'user_id' => $user->id]);
+                $user->update(['station_id' => $station->id]);
+            }
+        }
+
+        return redirect()->route('customer.dashboard');
+    }
 
     /**
      * Destroy an authenticated session.

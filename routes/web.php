@@ -27,18 +27,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
 
 // Customer Routes
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->group(function () {
-    Route::get('/select-station', function () {
-        $stations = \App\Models\Station::where('is_occupied', false)->get();
-        return view('customer.select_station', compact('stations'));
-    })->name('customer.select_station');
-
-    Route::post('/select-station', function (\Illuminate\Http\Request $request) {
-        $station = \App\Models\Station::findOrFail($request->station_id);
-        $station->update(['is_occupied' => true, 'user_id' => auth()->id()]);
-        auth()->user()->update(['station_id' => $request->station_id]);
-        return redirect()->route('customer.dashboard');
-    })->name('customer.select_station.store');
-
     Route::get('/dashboard', function () {
         return view('customer.dashboard');
     })->name('customer.dashboard');
@@ -49,5 +37,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Product Management
+Route::get('/products', [App\Http\Controllers\ProductController::class, 'index'])
+    ->name('admin.products.index');
+Route::get('/products/create', [App\Http\Controllers\ProductController::class, 'create'])
+    ->name('admin.products.create');
+Route::post('/products', [App\Http\Controllers\ProductController::class, 'store'])
+    ->name('admin.products.store');
+Route::delete('/products/{product}', [App\Http\Controllers\ProductController::class, 'destroy'])
+    ->name('admin.products.destroy');
 
 require __DIR__.'/auth.php';
