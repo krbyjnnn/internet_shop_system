@@ -25,25 +25,31 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
         $user = auth()->user();
+
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('customer.dashboard');
-    }
+        return redirect()->route('customer.select_station');
+}
 
     /**
      * Destroy an authenticated session.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = auth()->user();
+
+        if ($user && $user->station_id) {
+            \App\Models\Station::where('id', $user->station_id)
+                ->update(['is_occupied' => false, 'user_id' => null]);
+            $user->update(['station_id' => null]);
+        }
+
         Auth::guard('web')->logout();
-
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');

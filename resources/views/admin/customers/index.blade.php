@@ -21,13 +21,14 @@
     <a href="{{ route('admin.customers.create') }}">+ Create Customer</a>
     <br><br>
 
-    <table>
+   <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Name</th>
-                <th>Email</th>
+                <th>Username</th>
                 <th>Balance</th>
+                <th>Top-up</th>
             </tr>
         </thead>
         <tbody>
@@ -35,8 +36,17 @@
             <tr>
                 <td>{{ $customer->id }}</td>
                 <td>{{ $customer->name }}</td>
-                <td>{{ $customer->email }}</td>
+                <td>{{ $customer->username }}</td>
                 <td>₱{{ $customer->balance }}</td>
+                <td>
+                    <form method="POST" action="{{ route('admin.customers.topup', $customer) }}">
+                        @csrf
+                        <input type="number" name="amount" placeholder="Amount" min="1" style="width:80px; padding:4px;">
+                        <button type="submit" style="padding:4px 10px; background:#3498db; color:white; border:none; border-radius:4px; cursor:pointer;">
+                            Top-up
+                        </button>
+                    </form>
+                </td>
             </tr>
             @endforeach
         </tbody>
