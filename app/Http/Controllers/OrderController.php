@@ -66,4 +66,56 @@ class OrderController extends Controller
         $order->update(['status' => 'delivered']);
         return back()->with('success', 'Order marked as delivered!');
     }
+
+    public function storeMultiple(Request $request)
+    {
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $user = auth()->user();
+        $errors = [];
+        $successCount = 0;
+
+        foreach ($request->items as $item) {
+            $product = Product::find($item['product_id']);
+            $quantity = $item['quantity'];
+            $total = $product->price * $quantity;
+
+            // check stock
+            if ($product->stock < $quantity) {
+                $errors[] = "{$product->name} - not enough stock!";
+                continue;
+            }
+
+            // check balance
+            if ($user->balance < $total) {
+                $errors[] = "{$product->name} - insufficient balance!";
+                continue;
+            }
+
+            // create order
+            Order::create([
+                'user_id'     => $user->id,
+                'station_id'  => $user->station_id,
+                'product_id'  => $product->id,
+                'quantity'    => $quantity,
+                'total_price' => $total,
+                'status'      => 'pending',
+            ]);
+
+            // deduct balance and stock
+            $user->decrement('balance', $total);
+            $product->decrement('stock', $quantity);
+            $successCount++;
+        }
+
+        if (!empty($errors)) {
+            return back()->with('error', implode(', ', $errors));
+        }
+
+        return back()->with('success', "{$successCount} item(s) ordered successfully!");
+    }
 }

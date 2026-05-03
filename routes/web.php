@@ -22,9 +22,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/topup', [App\Http\Controllers\Admin\CustomerController::class, 'topup'])
         ->name('admin.customers.topup');
     Route::get('/topup', [App\Http\Controllers\Admin\CustomerController::class, 'topupForm'])
-    ->name('admin.topup');
+        ->name('admin.topup');
 
-        // Product Management
+    // Product Management
     Route::get('/products', [App\Http\Controllers\ProductController::class, 'index'])
         ->name('admin.products.index');
     Route::get('/products/create', [App\Http\Controllers\ProductController::class, 'create'])
@@ -49,7 +49,33 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->group(function
     })->name('customer.dashboard');
 
     Route::post('/orders', [App\Http\Controllers\OrderController::class, 'store'])
-    ->name('customer.orders.store');
+        ->name('customer.orders.store');
+    Route::post('/orders/multiple', [App\Http\Controllers\OrderController::class, 'storeMultiple'])
+        ->name('customer.orders.multiple');
+
+    Route::get('/locked', function () {
+        return view('customer.locked');
+    })->name('customer.locked');
+
+    Route::get('/logout-locked', function () {
+        $user = auth()->user();
+        if ($user && $user->station_id) {
+            \App\Models\Station::where('id', $user->station_id)
+                ->update(['is_occupied' => false, 'user_id' => null]);
+            $user->update(['station_id' => null]);
+        }
+        \Illuminate\Support\Facades\Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/');
+    })->name('customer.logout.locked');
+
+    Route::post('/deduct-balance', function (\Illuminate\Http\Request $request) {
+        $user = auth()->user();
+        $amount = $request->input('amount', 0);
+        $user->update(['balance' => 0]);
+        return response()->json(['success' => true]);
+    })->name('customer.deduct');
 });
 
 Route::middleware('auth')->group(function () {
