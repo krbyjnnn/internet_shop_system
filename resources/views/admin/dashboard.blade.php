@@ -57,6 +57,7 @@
         <a href="{{ route('admin.customers.index') }}" style="background: #3498db;">👥 Customers</a>
         <a href="{{ route('admin.topup') }}" style="background: #2ecc71;">💰 Top-up</a>
         <a href="{{ route('admin.products.index') }}" style="background: #e67e22;">🛒 Products</a>
+        <a href="{{ route('admin.orders.index') }}" style="background: #9b59b6;">📋 Orders</a>
     </div>
 
     <p>Total Stations: {{ $stations->count() }}</p>
